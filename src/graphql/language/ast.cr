@@ -24,23 +24,21 @@ module GraphQL
         end
       end
 
-      macro traverse(*values)
-        def visit(block : ASTNode -> _)
-          {% for key in values %}
-            case val = {{key.id}}
-            when Array
-              val.each(&.visit(block))
-            when nil
-            else
-              val.visit(block)
-            end
-          {% end %}
-
-          block.call(self)
-        end
+      def children
+        [] of ASTNode
       end
 
       def visit(block : ASTNode -> _)
+        children.each do |c|
+          case val = c
+          when Array
+            val.each(&.visit(block))
+          when nil
+          else
+            val.visit(block)
+          end
+        end
+
         block.call(self)
       end
     end # ASTNode
