@@ -1,30 +1,20 @@
 module GraphQL
   module Language
     abstract class ASTNode
-      macro inherited
-        VALUES = [] of Tuple(Symbol, Object.class)
-      end
-
       macro values(args)
-        {%
-          args.each do |k, v|
-            VALUES << {k, v}
-          end
-        %}
-
         property {{args.map { |k, v| "#{k} : #{v}" }.join(",").id}}
 
-        def_equals_and_hash {{VALUES.map(&.[0])}}
+        def_equals_and_hash {{args.keys}}
 
         {%
-          signatures = VALUES.map { |v| "#{v[0].id} " }
+          signatures = args.map { |k, v| "#{k.id} " }
           signature = (signatures + ["**rest"]).join(", ").id
-          assignments = VALUES.map do |v|
-            if v[1].id =~ /^Array/
-              type = v[1].id.gsub(/Array\(/, "").gsub(/\)/, "")
-              "@#{v[0].id} = #{v[0].id}.as(Array).map(&.as(#{type})).as(#{v[1].id})"
+          assignments = args.map do |k, v|
+            if v.id =~ /^Array/
+              type = v.id.gsub(/Array\(/, "").gsub(/\)/, "")
+              "@#{k.id} = #{k.id}.as(Array).map(&.as(#{type})).as(#{v.id})"
             else
-              "@#{v[0].id} = #{v[0].id}.as(#{v[1].id})"
+              "@#{k.id} = #{k.id}.as(#{v.id})"
             end
           end
         %}
