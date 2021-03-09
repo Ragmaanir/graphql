@@ -37,7 +37,7 @@ module GraphQL
 
       def map_children(&block : ASTNode -> _)
         visited_ids = [] of UInt64
-        visit(:children, visited_ids, block)
+        visit(visited_ids, block)
       end
 
       def to_s(io : IO)
