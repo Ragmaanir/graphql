@@ -38,10 +38,6 @@ module GraphQL
         [definitions]
       end
 
-      def map_children(&block : ASTNode -> _)
-        visit(block)
-      end
-
       def to_s(io : IO)
         GraphQL::Language::Generation.generate(self).to_s(io)
       end
@@ -164,7 +160,7 @@ module GraphQL
 
     # Base class for non-null type names and list type names
     class WrapperType < ASTNode
-      values({of_type: (Type)})
+      values({of_type: Type})
 
       def children
         [of_type]
