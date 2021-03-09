@@ -35,6 +35,11 @@ module GraphQL
                                  ScalarTypeDefinition | DirectiveDefinition | EnumTypeDefinition | InterfaceTypeDefinition | UnionTypeDefinition)})
       traverse :children, :definitions
 
+      def map_children(&block : ASTNode -> _)
+        visited_ids = [] of UInt64
+        visit(:children, visited_ids, block)
+      end
+
       def to_s(io : IO)
         GraphQL::Language::Generation.generate(self).to_s(io)
       end
