@@ -9,16 +9,16 @@ module GraphQL
         def initialize({{args.keys.join(",").id}}, **rest)
           {%
             assignments = args.map do |k, v|
-              if v.id =~ /^Array/
-                type = v.id.gsub(/Array\(/, "").gsub(/\)/, "")
-                "@#{k.id} = #{k.id}.as(Array).map(&.as(#{type})).as(#{v.id})"
+              if v.is_a?(Generic) && v.name.id == "Array"
+                type = v.type_vars.first.id
+                "@#{k.id} = #{k.id}.map(&.as(#{type}))"
               else
                 "@#{k.id} = #{k.id}"
               end
             end
           %}
 
-          {{assignments.size > 0 ? assignments.join("\n").id : "".id}}
+          {{assignments.join("\n").id}}
 
           super(**rest)
         end
