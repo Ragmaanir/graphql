@@ -6,24 +6,25 @@ module GraphQL
 
         def_equals_and_hash {{args.keys}}
 
-        {%
-          assignments = args.map do |k, v|
-            if v.id =~ /^Array/
-              type = v.id.gsub(/Array\(/, "").gsub(/\)/, "")
-              "@#{k.id} = #{k.id}.as(Array).map(&.as(#{type})).as(#{v.id})"
-            else
-              "@#{k.id} = #{k.id}.as(#{v.id})"
-            end
-          end
-        %}
-
         def initialize({{args.keys.join(",").id}}, **rest)
+          {%
+            assignments = args.map do |k, v|
+              if v.id =~ /^Array/
+                type = v.id.gsub(/Array\(/, "").gsub(/\)/, "")
+                "@#{k.id} = #{k.id}.as(Array).map(&.as(#{type})).as(#{v.id})"
+              else
+                "@#{k.id} = #{k.id}.as(#{v.id})"
+              end
+            end
+          %}
+
           {{assignments.size > 0 ? assignments.join("\n").id : "".id}}
+
           super(**rest)
         end
       end
 
-      macro traverse(name, *values)
+      macro traverse(*values)
         def visit(visited_ids = [] of UInt64, block = Proc(ASTNode, ASTNode?).new {})
           {% for key in values %}
             %val = {{key.id}}
