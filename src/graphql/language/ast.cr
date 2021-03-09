@@ -7,8 +7,6 @@ module GraphQL
         def_equals_and_hash {{args.keys}}
 
         {%
-          signatures = args.map { |k, v| "#{k.id} " }
-          signature = (signatures + ["**rest"]).join(", ").id
           assignments = args.map do |k, v|
             if v.id =~ /^Array/
               type = v.id.gsub(/Array\(/, "").gsub(/\)/, "")
@@ -19,7 +17,7 @@ module GraphQL
           end
         %}
 
-        def initialize({{signature}})
+        def initialize({{args.keys.join(",").id}}, **rest)
           {{assignments.size > 0 ? assignments.join("\n").id : "".id}}
           super(**rest)
         end
