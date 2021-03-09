@@ -25,27 +25,22 @@ module GraphQL
       end
 
       macro traverse(*values)
-        def visit(visited_ids = [] of UInt64, block = Proc(ASTNode, ASTNode?).new {})
+        def visit(visited_ids : Array(UInt64), block = Proc(ASTNode, ASTNode?).new {})
           {% for key in values %}
-            %val = {{key.id}}
-            if %val.is_a?(Array)
-              %result = %val.map! do |v|
-                next v if visited_ids.includes? v.object_id
+            case val = {{key.id}}
+            when Array
+              val.each do |v|
                 visited_ids << v.object_id
-                res = v.visit(visited_ids, block)
-                res.is_a?(ASTNode) ? res : v
+                v.visit(visited_ids, block)
               end
+            when nil
             else
-              unless %val == nil || visited_ids.includes? %val.object_id
-                visited_ids << %val.object_id
-                %result = %val.not_nil!.visit(visited_ids, block)
-                self.{{key.id}}=(%result)
-              end
+              visited_ids << val.object_id
+              val.visit(visited_ids, block)
             end
           {% end %}
 
-          res = block.call(self)
-          res.is_a?(self) ? res : self
+          block.call(self)
         end
       end
 
